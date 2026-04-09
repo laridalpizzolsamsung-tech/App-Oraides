@@ -438,9 +438,9 @@
 
 <script>
   const SUPABASE_URL = 'https://svlsgebtobjxlqyzoksp.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bHNnZWJ0b2JqeGxxeXpva3NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTUzNTksImV4cCI6MjA5MTMzMTM1OX0.41NwoENqW0fCdB8l0LtPyESd6EbBj3d8Hf4xrM5HTJM';
+  const SUPABASE_KEY = 'sb_publishable_3pA-Go9Hz1VIDAAaz397xg_5EqkatHV';
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script>
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -487,7 +487,8 @@
     if(!name||!email||!pass){showMsg('Preencha todos os campos.','error');return;}
     if(pass.length<6){showMsg('Senha deve ter ao menos 6 caracteres.','error');return;}
     showMsg('Criando conta...','');
-    const {error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+    const {data:signUpData,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name},emailRedirectTo:null}});
+    if(!error&&signUpData?.user&&!signUpData?.session){showMsg("Conta criada! Agora clique em Entrar com o mesmo e-mail e senha. ✅","success");return;}
     if(error) showMsg('Erro: '+error.message,'error');
     else showMsg('Conta criada! Verifique seu e-mail 📧','success');
   };
