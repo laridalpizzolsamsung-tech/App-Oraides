@@ -477,8 +477,9 @@
     const pass=document.getElementById('login-pass').value;
     if(!email||!pass){showMsg('Preencha todos os campos.','error');return;}
     showMsg('Entrando...','');
-    const {error}=await sb.auth.signInWithPassword({email,password:pass});
+    const {data:loginData,error}=await sb.auth.signInWithPassword({email,password:pass});
     if(error) showMsg('E-mail ou senha incorretos.','error');
+    else if(!loginData?.session) showMsg('Erro ao iniciar sessão. Tente novamente.','error');
   };
   window.doRegister = async () => {
     const name=document.getElementById('reg-name').value.trim();
@@ -504,8 +505,19 @@
       subscribeRT();
     } else {
       currentUser=null;
+      allTxs=[];allNotes=[];
       document.getElementById('auth-screen').style.display='flex';
       document.getElementById('app-screen').style.display='none';
+    }
+  });
+  // Restore session on load
+  sb.auth.getSession().then(({data:{session}})=>{
+    if(session?.user){
+      currentUser=session.user;
+      document.getElementById('header-name').textContent=currentUser.user_metadata?.full_name||currentUser.email;
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('app-screen').style.display='flex';
+      loadAll();subscribeRT();
     }
   });
 
@@ -542,7 +554,7 @@
       const {error:upErr}=await sb.storage.from('comprovantes').upload(path,rcFile);
       if(!upErr){const {data:ud}=sb.storage.from('comprovantes').getPublicUrl(path);receipt_url=ud.publicUrl;}
     }
-    await sb.from('transactions').insert({
+    const {error:txErr}=await sb.from('transactions').insert({
       descricao:desc,val,cat,date,obs,type:txType,
       future:new Date(date+'T00:00:00')>new Date(),
       receipt_url,
@@ -550,6 +562,7 @@
       user_id:currentUser.id
     });
     btn.disabled=false;btn.textContent='Salvar lançamento';
+    if(txErr){alert('Erro ao salvar: '+txErr.message);return;}
     closeMo('tx-mo');
   };
 
@@ -567,13 +580,14 @@
       const {error:upErr}=await sb.storage.from('comprovantes').upload(path,noteImgFile);
       if(!upErr){const {data:ud}=sb.storage.from('comprovantes').getPublicUrl(path);img_url=ud.publicUrl;}
     }
-    await sb.from('notes').insert({
+    const {error:noteErr}=await sb.from('notes').insert({
       title,body,img_url,
       type:noteType,
       user_name:currentUser.user_metadata?.full_name||currentUser.email,
       user_id:currentUser.id
     });
     btn.disabled=false;btn.textContent='Salvar anotação';
+    if(noteErr){alert('Erro ao salvar: '+noteErr.message);return;}
     closeMo('note-mo');
   };
 
