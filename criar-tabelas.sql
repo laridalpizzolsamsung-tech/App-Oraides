@@ -6,7 +6,7 @@
 CREATE TABLE transactions (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at timestamptz DEFAULT now(),
-  desc text NOT NULL,
+  descricao text NOT NULL,
   val numeric NOT NULL,
   type text NOT NULL CHECK (type IN ('in','out')),
   cat text NOT NULL,

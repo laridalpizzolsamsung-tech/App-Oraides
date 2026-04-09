@@ -542,7 +542,7 @@
       if(!upErr){const {data:ud}=sb.storage.from('comprovantes').getPublicUrl(path);receipt_url=ud.publicUrl;}
     }
     await sb.from('transactions').insert({
-      desc,val,cat,date,obs,type:txType,
+      descricao:desc,val,cat,date,obs,type:txType,
       future:new Date(date+'T00:00:00')>new Date(),
       receipt_url,
       user_name:currentUser.user_metadata?.full_name||currentUser.email,
@@ -605,7 +605,7 @@
     const fut=isFut(tx);
     return `<div class="tx-item" onclick="showTxDetail('${tx.id}')">
       <div class="tx-av" style="background:${CC[tx.cat]||'#f3f4f6'}">${CE[tx.cat]||'📦'}</div>
-      <div class="tx-info"><div class="tx-desc">${tx.desc}</div><div class="tx-meta">${tx.user_name} · ${fmtD(tx.date)} · ${tx.cat}</div>${tx.receipt_url?'<div class="has-rc">📎 comprovante</div>':''}</div>
+      <div class="tx-info"><div class="tx-desc">${tx.descricao}</div><div class="tx-meta">${tx.user_name} · ${fmtD(tx.date)} · ${tx.cat}</div>${tx.receipt_url?'<div class="has-rc">📎 comprovante</div>':''}</div>
       <div class="tx-rt"><div class="tx-amt ${tx.type}">${tx.type==='out'?'-':'+'}${fmt(tx.val)}</div><span class="tx-badge ${fut?'b-fut':'b-ok'}">${fut?'previsto':'realizado'}</span></div>
     </div>`;
   };
@@ -715,7 +715,7 @@
     const canDel=tx.user_id===currentUser?.id;
     document.getElementById('det-content').innerHTML=`
       <div class="det-amt ${tx.type}">${tx.type==='out'?'- ':'+'}${fmt(tx.val)}</div>
-      <div style="font-size:19px;font-weight:700;font-family:var(--ff-display);margin-bottom:1.5rem">${tx.desc}</div>
+      <div style="font-size:19px;font-weight:700;font-family:var(--ff-display);margin-bottom:1.5rem">${tx.descricao}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
         <div><div class="det-lbl">Data</div><div class="det-val">${fmtD(tx.date)}</div></div>
         <div><div class="det-lbl">Status</div><div class="det-val">${fut?'⏰ Previsto':'✅ Realizado'}</div></div>
